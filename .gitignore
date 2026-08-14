@@ -1,0 +1,62 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local secrets and config
+.env
+.env.*
+*.local
+
+# Datasets and local data roots
+latest_version/
+data_full/
+data/
+datasets/
+
+# Model weights and caches
+weights/
+uni/
+*.pth
+*.pt
+*.bin
+*.safetensors
+
+# Generated training artifacts
+work/
+outputs/
+logs/
+checkpoints/
+
+# Streamlit and notebook runtime files
+.streamlit/secrets.toml
+*.executed.ipynb
+
+# Optional archives
+*.zip
+*.tar
+*.gz
+# Feature caches and serialized generated artifacts
+*.h5
+*.hdf5
+*.npy
+*.npz
+*.pkl
+*.pickle
+*.joblib
+# Private labels / answer keys
+*PRIVATE*
+*private*
+*answer_key*
+*blind_pool*
