@@ -32,6 +32,14 @@ def exec_notebook_cells(cell_ids: list[str]) -> dict:
     return ns
 
 
+def safe_torch_load(torch_module, path, map_location="cpu"):
+    """Load trusted tensor checkpoints without enabling arbitrary pickle objects."""
+    try:
+        return torch_module.load(path, map_location=map_location, weights_only=True)
+    except TypeError:
+        return torch_module.load(path, map_location=map_location)  # nosec B614  # nosemgrep
+
+
 def validate_cache(cache_path: Path, expected_ids: set[str], scales: list[int], feature_dim: int) -> None:
     import h5py
     import numpy as np
@@ -125,7 +133,7 @@ def run_heldout_test(
     slide_probs: dict[str, list] = {}
     slide_labels: dict[str, int] = {}
     for ckpt_path in ckpt_files:
-        ckpt = torch.load(ckpt_path, map_location="cpu")
+        ckpt = safe_torch_load(torch, ckpt_path, map_location="cpu")
         if ckpt.get("checkpoint_role") not in (None, "main"):
             print(f"Skipping non-main checkpoint: {ckpt_path}")
             continue

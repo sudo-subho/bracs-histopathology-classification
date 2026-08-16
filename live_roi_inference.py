@@ -100,6 +100,15 @@ def get_uni_transform():
     return create_transform(**config)
 
 
+def safe_torch_load(path, map_location="cpu"):
+    """Load trusted tensor checkpoints without enabling arbitrary pickle objects."""
+    try:
+        return torch.load(path, map_location=map_location, weights_only=True)
+    except TypeError:
+        # Older PyTorch versions do not support weights_only. This project pins torch>=2.4.
+        return torch.load(path, map_location=map_location)  # nosec B614  # nosemgrep
+
+
 def build_uni_model():
     import timm
 
@@ -129,7 +138,7 @@ def load_uni(device: str):
     )
     for path in candidates:
         if path.exists():
-            state_dict = torch.load(path, map_location="cpu")
+            state_dict = safe_torch_load(path, map_location="cpu")
             if any(k.startswith("module.") for k in state_dict):
                 state_dict = {k.replace("module.", ""): v for k, v in state_dict.items()}
             model.load_state_dict(state_dict, strict=True)
@@ -139,7 +148,7 @@ def load_uni(device: str):
     from huggingface_hub import hf_hub_download
 
     ckpt_path = hf_hub_download("MahmoodLab/UNI", "pytorch_model.bin")
-    state_dict = torch.load(ckpt_path, map_location="cpu")
+    state_dict = safe_torch_load(ckpt_path, map_location="cpu")
     model.load_state_dict(state_dict, strict=True)
     model.to(device).eval()
     return model
@@ -483,7 +492,7 @@ def predict_roi_image(
     used_paths = []
     max_patches = 512
     for ckpt_path in ckpt_paths:
-        ckpt = torch.load(ckpt_path, map_location="cpu")
+        ckpt = safe_torch_load(ckpt_path, map_location="cpu")
         if ckpt.get("checkpoint_role") not in (None, "main"):
             continue
         config = dict(ckpt.get("config") or {})
